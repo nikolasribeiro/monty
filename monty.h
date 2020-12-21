@@ -1,13 +1,25 @@
 #ifndef MONTY_H
 #define MONTY_H
+
+#include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <math.h>
+
+/**
+ * struct global_variables_s - structure for variables as global variables.
+ * @number: string with the parameter given after push
+ * @fd: file descriptor of opened file
+ * @buffer: buffer getline
+ */
+typedef struct global_variables_s
+{
+	char *number;
+	FILE *fd;
+	char *buffer;
+} global_variables_t;
 
 /**
  * struct stack_s - doubly linked list representation of a stack (or queue)
@@ -20,9 +32,9 @@
  */
 typedef struct stack_s
 {
-        int n;
-        struct stack_s *prev;
-        struct stack_s *next;
+	int n;
+	struct stack_s *prev;
+	struct stack_s *next;
 } stack_t;
 
 /**
@@ -35,45 +47,39 @@ typedef struct stack_s
  */
 typedef struct instruction_s
 {
-        char *opcode;
-        void (*f)(stack_t **stack, unsigned int line_number);
+	char *opcode;
+	void (*f)(stack_t **stack, unsigned int line_number);
 } instruction_t;
 
-/**
- * struct global_s - hold global variables
- * @return_value: return value of functions
- * @mode: mode of list
- * @command: byte code command
- * @push_value: argument to push command
- */
-typedef struct global_s
-{
-	int return_value;
-	int mode;
-	char *command;
-	char *push_value;
-} global_t;
+extern global_variables_t var_global;
 
-/* global variables */
-extern global_t GLOBALS_VAR;
-global_t GLOBALS_VAR;
+/*----------main--------------*/
+void free_nodes(stack_t *stack);
 
+/*----------read_line---------*/
+void open_file(char *filename, stack_t **stack);
+void read_file(char *filename, stack_t **stack);
+int tokenizer(char *buffer, stack_t **stack,
+			  int line_number, int data_format);
+void get_function(char *opcode, stack_t **stack,
+				  int line_number, int data_format);
 
-/* print stack opcodes */
-void pall(stack_t **h, unsigned int line_number);
+/*-----stack_operations-------*/
+void _push_stack(stack_t **stack, unsigned int line_number);
 
+/*void _push_queue(stack_t **new_node, unsigned int line_number);*/
+void _pall(stack_t **stack, unsigned int line_number);
+void _pint(stack_t **stack, unsigned int line_number);
+void _pop(stack_t **stack, unsigned int line_number);
+void _swap(stack_t **stack, unsigned int line_number);
+/*-----math_operations-------*/
+void _add(stack_t **stack, unsigned int line_number);
 
-/* push stack opcodes */
-void push_node(stack_t **head, int n);
-void push_node_mode(stack_t **head, unsigned int line_number);
-void push_node_end(stack_t **head, int n);
+/*-----string_operations-------*/
+void _nop(stack_t **stack, unsigned int line_number);
 
-/* find opcode function pointer */
-int find_opcode(stack_t **head, unsigned int line_number);
+/*-------error_handler--------*/
+void _error1(int error_code, ...);
+void _error2(int error_code, ...);
 
-/* function UTILITIES */
-int is_empty(char *str);
-void free_list(stack_t *head);
-
-
-#endif
+#endif /* MONTY_H */

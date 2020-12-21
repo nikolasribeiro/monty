@@ -1,55 +1,43 @@
 #include "monty.h"
+
+global_variables_t var_global;
 /**
- * main - entry point for Monty project
- * @ac: number of arguments
- * @av: array of pointers to those arguments
- * Return: Always 0 on success
+ * main - program that prints its
+ * name, followed by a new line.
+ * @argc: argument count
+ * @argv: array of strings
+ * Return: 0 for success
  */
-int main(int ac, char **av)
+
+int main(int argc, char *argv[])
 {
-	unsigned int line_number; size_t line_len; FILE * fp;
-	char *line;
-	stack_t *list_head; int len;
+	stack_t *stack = NULL;
 
-	GLOBALS_VAR.return_value = 0;
-	GLOBALS_VAR.mode = 0;
-	GLOBALS_VAR.command = NULL;
-	GLOBALS_VAR.push_value = NULL;
+	if (argc != 2)
+		_error1(1);
 
-	line = NULL; list_head = NULL; len = 0; line_number = 0; line_len = 0;
+	open_file(argv[1], &stack);
+	free_nodes(stack);
+	return (0);
+}
 
-	if (ac != 2)
+/**
+ * free_nodes - function that
+ * frees a doubly linked list dlist_t.
+ * @stack: Stack
+ * Return: void
+ */
+void free_nodes(stack_t *stack)
+{
+	stack_t *temp;
+
+	if (stack == NULL)
+		return;
+	while (stack != NULL)
 	{
-		printf("USAGE: monty file\n");
-		exit(EXIT_FAILURE);
+		temp = stack;
+		stack = stack->next;
+		/*freeing each node allocated with malloc*/
+		free(temp);
 	}
-
-	fp = fopen(av[1], "r");
-	if (fp == NULL)
-	{
-		printf("Error: Can't open file %s\n", av[1]);
-		exit(EXIT_FAILURE);
-	}
-	while ((len = getline(&line, &line_len, fp)) != -1)
-	{
-		line_number++;
-
-		if (!(line[0] == '\n') && !(line[0] == '#') && !is_empty(line))
-		{
-			if (GLOBALS_VAR.command[0] == '#')
-				continue;
-
-			GLOBALS_VAR.return_value = find_opcode(&list_head, line_number);
-            
-			if (GLOBALS_VAR.return_value == -1)
-			{
-				break;
-			}
-		}
-	}
-	free(line); free_list(list_head); fclose(fp);
-	if (GLOBALS_VAR.return_value == -1)
-		exit(EXIT_FAILURE);
-	else
-		exit(EXIT_SUCCESS);
 }
